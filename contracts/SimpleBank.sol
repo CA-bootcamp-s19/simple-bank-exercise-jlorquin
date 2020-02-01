@@ -1,6 +1,6 @@
 /*
     This exercise has been updated to use Solidity version 0.5
-    Breaking changes from 0.4 to 0.5 can be found here: 
+    Breaking changes from 0.4 to 0.5 can be found here:
     https://solidity.readthedocs.io/en/v0.5.0/050-breaking-changes.html
 */
 
@@ -11,29 +11,29 @@ contract SimpleBank {
     //
     // State variables
     //
-    
+
     /* Fill in the keyword. Hint: We want to protect our users balance from other contracts*/
     mapping (address => uint) private balances ;
-    
+
     /* Fill in the keyword. We want to create a getter function and allow contracts to be able to see if a user is enrolled.  */
     mapping (address => bool) public enrolled;
 
     /* Let's make sure everyone knows who owns the bank. Use the appropriate keyword for this*/
     address public owner;
-    
+
     //
     // Events - publicize actions to external listeners
     //
-    
+
     /* Add an argument for this event, an accountAddress */
     event LogEnrolled(address indexed accountAddress);
 
     /* Add 2 arguments for this event, an accountAddress and an amount */
-    event LogDepositMade(address indexed accountAddress, uint amount);
+    event LogDepositMade(address indexed accountAddress, uint indexed amount);
 
     /* Create an event called LogWithdrawal */
     /* Add 3 arguments for this event, an accountAddress, withdrawAmount and a newBalance */
-    event LogWithdrawal(address indexed accountAddress, uint withdrawAmount, uint newBalance);
+    event LogWithdrawal(address indexed accountAddress, uint indexed withdrawAmount, uint indexed newBalance);
 
     //
     // Functions
@@ -76,9 +76,8 @@ contract SimpleBank {
     // Use the appropriate global variables to get the transaction sender and value
     // Emit the appropriate event
     // Users should be enrolled before they can make deposits
-    // Javier: Why is it public and not external?
     function deposit() public payable returns (uint) {
-        require(enrolled[msg.sender]);
+        require(enrolled[msg.sender], "You are not enrolled in the bank");
         balances[msg.sender] += msg.value;
         emit LogDepositMade(msg.sender, msg.value);
         return balances[msg.sender];
@@ -88,9 +87,9 @@ contract SimpleBank {
     /// @dev This does not return any excess ether sent to it
     /// @param withdrawAmount amount you want to withdraw
     /// @return The balance remaining for the user
-    // Emit the appropriate event    
+    // Emit the appropriate event
     function withdraw(uint withdrawAmount) public returns (uint) {
-        require(balances[msg.sender] >= withdrawAmount);
+        require(balances[msg.sender] >= withdrawAmount, "You don't have enough balance to withdraw such amount");
         balances[msg.sender] -= withdrawAmount;
         msg.sender.transfer(withdrawAmount);
         emit LogWithdrawal(msg.sender, withdrawAmount, balances[msg.sender]);
